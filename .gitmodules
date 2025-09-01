@@ -1,0 +1,9 @@
+[submodule "microsservices/sale"]
+	path = microsservices/sale
+	url = git@ssh.dev.azure.com:v3/ailtonmoura/ipet-sale/ipet-sale
+[submodule "microsservices/invoicing"]
+	path = microsservices/invoicing
+	url = https://ailtonmoura@dev.azure.com/ailtonmoura/ipet-invoicing/_git/ipet-invoicing
+[submodule "microsservices/delivery"]
+	path = microsservices/delivery
+	url = git@ssh.dev.azure.com:v3/ailtonmoura/ipet-delivery/ipet-delivery
