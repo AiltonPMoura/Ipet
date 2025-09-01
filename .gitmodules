@@ -7,3 +7,6 @@
 [submodule "microsservices/delivery"]
 	path = microsservices/delivery
 	url = git@ssh.dev.azure.com:v3/ailtonmoura/ipet-delivery/ipet-delivery
+[submodule "microsservices/ordering"]
+	path = microsservices/ordering
+	url = https://ailtonmoura@dev.azure.com/ailtonmoura/ipet-ordering/_git/ipet-ordering
