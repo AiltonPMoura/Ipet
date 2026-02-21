@@ -1,6 +1,0 @@
-spring:
-  application:
-    name: Catalog Microsservice
-
-server:
-  port: 8200
