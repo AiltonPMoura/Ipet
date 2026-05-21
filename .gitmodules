@@ -4,3 +4,6 @@
 [submodule "microsservices/catalog"]
 	path = microsservices/catalog
 	url = https://github.com/AiltonPMoura/ipet-catalog.git
+[submodule "microsservices/billing"]
+	path = microsservices/billing
+	url = https://github.com/AiltonPMoura/ipet-billing.git
