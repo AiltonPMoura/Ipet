@@ -35,13 +35,13 @@ paths:
               schema:
                 type: string
         400:
-          description: Bad request
+          $ref: '#/components/responses/BadRequest'
         409:
-          description: Conflict
+          $ref: '#/components/responses/Conflict'
         422:
-          description: Unprocessable Entity
+          $ref: '#/components/responses/UnprocessableEntity'
         500:
-          description: Internal Server Error
+          $ref: '#/components/responses/InternalError'
     get:
       tags: [Customers]
       summary: Filter customers (paged)
@@ -74,7 +74,12 @@ paths:
           name: sort
           schema:
             type: string
-            description: "Sort criteria in the format: property(asc|desc). Multiple sort params allowed."
+            example: firstName
+        - in: query
+          name: direction
+          schema:
+            type: string
+            default: asc
       responses:
         200:
           description: A paged list of customer summaries
@@ -103,7 +108,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/CustomerDetailOutput'
         404:
-          description: Customer not found
+          $ref: '#/components/responses/NotFound'
     put:
       tags: [Customers]
       summary: Update a customer
@@ -117,21 +122,23 @@ paths:
         204:
           description: Updated successfully
         400:
-          description: Bad request
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
         409:
-          description: Conflict
+          $ref: '#/components/responses/Conflict'
         422:
-          description: Unprocessable Entity
+          $ref: '#/components/responses/UnprocessableEntity'
         500:
-          description: Internal Server Error
+          $ref: '#/components/responses/InternalError'
     delete:
       tags: [ Customers ]
       summary: Delete a customer
       responses:
         204:
-          description: Updated successfully
+          description: Deleted successfully
         404:
-          description: Customer not found
+          $ref: '#/components/responses/NotFound'
 
   /api/v1/customers/{customerId}/email:
     parameters:
@@ -257,6 +264,37 @@ paths:
           description: Customer or address not found
 
 components:
+  responses:
+    NotFound:
+      description: Resorce not found
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+    BadRequest:
+      description: Invalid Request
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+    Conflict:
+      description: Confilct Resource
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+    UnprocessableEntity:
+      description: Unprocessable entity
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+    InternalError:
+      description: Internal Server Error
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
   schemas:
     CustomerInput:
       type: object
@@ -403,19 +441,27 @@ components:
         phone:
           type: string
 
-    ErrorResponse:
+    ProblemDetail:
       type: object
+      required: [status, type]
       properties:
-        timestamp:
-          type: string
-          format: date-time
         status:
           type: integer
-        error:
+          example: 400
+        type:
           type: string
-        message:
+          example: /errors/invalid-data
+        title:
           type: string
-        path:
+          example: Invalid Fields
+        instance:
           type: string
+          example: /api/v1/customer
+        detail:
+          type: string
+          example: One or more fields are invalid
+        fields:
+          type: object
+          description: Fields that caused the error
 
 
