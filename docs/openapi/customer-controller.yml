@@ -101,7 +101,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Customer'
+                $ref: '#/components/schemas/CustomerDetailOutput'
         404:
           description: Customer not found
     put:
@@ -149,15 +149,14 @@ paths:
         content:
           application/json:
             schema:
-              type: string
-              format: email
+              $ref: '#/components/schemas/EmailInput'
       responses:
-        '204':
+        204:
           description: Email changed
-        '400':
+        400:
           description: Validation error
 
-  /api/v1/customers/{customerId}/address:
+  /api/v1/customers/{customerId}/addresses:
     parameters:
       - in: path
         name: customerId
@@ -173,19 +172,31 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AddressInput'
+              $ref: '#/components/schemas/AddressData'
       responses:
-        '201':
+        201:
           description: Address added. Location header may contain the address URL or resource id.
           headers:
             Location:
               description: URL of the created address
               schema:
                 type: string
-        '400':
+        400:
           description: Validation error
+    get:
+      tags: [ Customers ]
+      summary: find All Addresses
+      responses:
+        200:
+          description: A list of addresses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomerAddressOutput'
 
-  /api/v1/customers/{customerId}/address/{addressId}:
+  /api/v1/customers/{customerId}/addresses/{addressId}:
     parameters:
       - in: path
         name: customerId
@@ -207,32 +218,71 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AddressInput'
+              $ref: '#/components/schemas/AddressData'
       responses:
-        '204':
+        204:
           description: Address updated
-        '400':
+        400:
           description: Validation error
-    patch:
-      tags: [ Customers ]
-      summary: Change principal address for a customer
-      responses:
-        '204':
-          description: Principal address changed
-        '404':
-          description: Customer or address not found
     delete:
       tags: [Customers]
       summary: Remove an address from a customer
       responses:
-        '204':
+        204:
           description: Address removed
-        '404':
+        404:
+          description: Customer or address not found
+
+  /api/v1/customers/{customerId}/addresses/{addressId}/principal:
+    parameters:
+      - in: path
+        name: customerId
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - in: path
+        name: addressId
+        required: true
+        schema:
+          type: string
+          format: uuid
+    put:
+      tags: [ Customers ]
+      summary: Change principal address for a customer
+      responses:
+        204:
+          description: Principal address changed
+        404:
           description: Customer or address not found
 
 components:
   schemas:
-    Customer:
+    CustomerInput:
+      type: object
+      required: [ firstName, lastName, email, phone, document, birthDate, address ]
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          example: 11912345678
+        document:
+          type: string
+          example: 123456789
+        birthDate:
+          type: string
+          format: date
+          example: 1990-01-01
+        address:
+          $ref: '#/components/schemas/AddressData'
+
+    CustomerDetailOutput:
       type: object
       properties:
         id:
@@ -259,12 +309,15 @@ components:
           type: string
           format: date-time
           example: 2020-01-01T14:10:32Z
-        address:
-          type: array
-          items:
-            $ref: '#/components/schemas/Address'
 
-    Address:
+    EmailInput:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+
+    CustomerAddressOutput:
       type: object
       properties:
         id:
@@ -288,31 +341,7 @@ components:
         isPrincipal:
           type: boolean
 
-    CustomerInput:
-      type: object
-      required: [firstName, lastName, email, phone, document, birthDate, address]
-      properties:
-        firstName:
-          type: string
-        lastName:
-          type: string
-        email:
-          type: string
-          format: email
-        phone:
-          type: string
-          example: 11912345678
-        document:
-          type: string
-          example: 123456789
-        birthDate:
-          type: string
-          format: date
-          example: 1990-01-01
-        address:
-          $ref: '#/components/schemas/AddressInput'
-
-    AddressInput:
+    AddressData:
       type: object
       required: [street, number, neighborhood, city, state, zipCode]
       properties:
