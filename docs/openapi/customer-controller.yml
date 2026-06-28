@@ -1,0 +1,392 @@
+openapi: 3.0.3
+info:
+  title: Ipet - Customer
+  version: 1.0.0
+  description: OpenAPI specification for the CustomerController in the Ordering microservice.
+
+servers:
+  - description: Development
+    url: http://localhost:8080
+  - description: Production
+    url: https://ipet.com
+
+tags:
+  - name: Customers
+    description: Operations related to customers and their addresses
+
+paths:
+  /api/v1/customers:
+    post:
+      tags: [Customers]
+      summary: Create a new customer
+      description: Create a new customer description
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerInput'
+      responses:
+        201:
+          description: Created. Location header contains URL of the new resource.
+          headers:
+            Location:
+              description: URL of the created customer
+              schema:
+                type: string
+        400:
+          description: Bad request
+        409:
+          description: Conflict
+        422:
+          description: Unprocessable Entity
+        500:
+          description: Internal Server Error
+    get:
+      tags: [Customers]
+      summary: Filter customers (paged)
+      parameters:
+        - in: query
+          name: firstName
+          schema:
+            type: string
+        - in: query
+          name: lastName
+          schema:
+            type: string
+        - in: query
+          name: email
+          schema:
+            type: string
+        - in: query
+          name: page
+          schema:
+            type: integer
+            format: int32
+            default: 0
+        - in: query
+          name: size
+          schema:
+            type: integer
+            format: int32
+            default: 20
+        - in: query
+          name: sort
+          schema:
+            type: string
+            description: "Sort criteria in the format: property(asc|desc). Multiple sort params allowed."
+      responses:
+        200:
+          description: A paged list of customer summaries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedCustomerSummary'
+
+  /api/v1/customers/{customerId}:
+    parameters:
+      - in: path
+        name: customerId
+        required: true
+        example: 09a46223-1757-454a-bd30-75b36f09e765
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags: [Customers]
+      summary: Get a customer by id
+      responses:
+        200:
+          description: Customer found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+        404:
+          description: Customer not found
+    put:
+      tags: [Customers]
+      summary: Update a customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerUpdateInput'
+      responses:
+        204:
+          description: Updated successfully
+        400:
+          description: Bad request
+        409:
+          description: Conflict
+        422:
+          description: Unprocessable Entity
+        500:
+          description: Internal Server Error
+    delete:
+      tags: [ Customers ]
+      summary: Delete a customer
+      responses:
+        204:
+          description: Updated successfully
+        404:
+          description: Customer not found
+
+  /api/v1/customers/{customerId}/email:
+    parameters:
+      - in: path
+        name: customerId
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      tags: [Customers]
+      summary: Change customer email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+              format: email
+      responses:
+        '204':
+          description: Email changed
+        '400':
+          description: Validation error
+
+  /api/v1/customers/{customerId}/address:
+    parameters:
+      - in: path
+        name: customerId
+        required: true
+        schema:
+          type: string
+          format: uuid
+    post:
+      tags: [ Customers ]
+      summary: Add an address to a customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddressInput'
+      responses:
+        '201':
+          description: Address added. Location header may contain the address URL or resource id.
+          headers:
+            Location:
+              description: URL of the created address
+              schema:
+                type: string
+        '400':
+          description: Validation error
+
+  /api/v1/customers/{customerId}/address/{addressId}:
+    parameters:
+      - in: path
+        name: customerId
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - in: path
+        name: addressId
+        required: true
+        schema:
+          type: string
+          format: uuid
+    put:
+      tags: [ Customers ]
+      summary: Update a customer address
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddressInput'
+      responses:
+        '204':
+          description: Address updated
+        '400':
+          description: Validation error
+    patch:
+      tags: [ Customers ]
+      summary: Change principal address for a customer
+      responses:
+        '204':
+          description: Principal address changed
+        '404':
+          description: Customer or address not found
+    delete:
+      tags: [Customers]
+      summary: Remove an address from a customer
+      responses:
+        '204':
+          description: Address removed
+        '404':
+          description: Customer or address not found
+
+components:
+  schemas:
+    Customer:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          example: 11912345678
+        document:
+          type: string
+          example: 123456789
+        birthDate:
+          type: string
+          format: date
+          example: 1990-01-01
+        registeredAt:
+          type: string
+          format: date-time
+          example: 2020-01-01T14:10:32Z
+        address:
+          type: array
+          items:
+            $ref: '#/components/schemas/Address'
+
+    Address:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 09a46223-1757-454a-bd30-75b36f09e765
+        street:
+          type: string
+        number:
+          type: string
+        complement:
+          type: string
+        neighborhood:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zipCode:
+          type: string
+        isPrincipal:
+          type: boolean
+
+    CustomerInput:
+      type: object
+      required: [firstName, lastName, email, phone, document, birthDate, address]
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          example: 11912345678
+        document:
+          type: string
+          example: 123456789
+        birthDate:
+          type: string
+          format: date
+          example: 1990-01-01
+        address:
+          $ref: '#/components/schemas/AddressInput'
+
+    AddressInput:
+      type: object
+      required: [street, number, neighborhood, city, state, zipCode]
+      properties:
+        street:
+          type: string
+        number:
+          type: string
+        complement:
+          type: string
+        neighborhood:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zipCode:
+          type: string
+
+    CustomerUpdateInput:
+      type: object
+      required: [firstName, lastName, phone]
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phone:
+          type: string
+
+    PagedCustomerSummary:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerSummaryOutput'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+        number:
+          type: integer
+        size:
+          type: integer
+
+    CustomerSummaryOutput:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+
+
