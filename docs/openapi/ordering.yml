@@ -15,6 +15,8 @@ tags:
     description: Operations related to customers and their addresses
   - name: Companies
     description: Operations related to companies
+  - name: Pets
+    description: Operations related to customer pets
 
 paths:
   /api/v1/customers:
@@ -174,7 +176,11 @@ paths:
               schema:
                 type: string
         400:
-          description: Validation error
+          $ref: '#/components/responses/BadRequest'
+        422:
+          $ref: '#/components/responses/UnprocessableEntity'
+        500:
+          $ref: '#/components/responses/InternalError'
     get:
       tags: [ Customers ]
       summary: find All Addresses
@@ -375,6 +381,118 @@ paths:
         400:
          description: Validation error
 
+  /api/v1/customers/{customerId}/pets:
+    parameters:
+      - in: path
+        name: customerId
+        required: true
+        schema:
+         type: string
+         format: uuid
+    post:
+      tags: [Pets]
+      summary: Create a new pet for a customer
+      requestBody:
+        required: true
+        content:
+         application/json:
+           schema:
+             $ref: '#/components/schemas/PetInput'
+      responses:
+        201:
+         description: Created. Location header contains URL of the new resource.
+         headers:
+           Location:
+             description: URL of the created pet
+             schema:
+               type: string
+        400:
+         $ref: '#/components/responses/BadRequest'
+        422:
+         $ref: '#/components/responses/UnprocessableEntity'
+        500:
+         $ref: '#/components/responses/InternalError'
+    get:
+      tags: [Pets]
+      summary: Filter customer pets (paged)
+      parameters:
+        - in: query
+          name: name
+          schema:
+            type: string
+        - in: query
+          name: type
+          schema:
+            type: string
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+        - $ref: '#/components/parameters/sort'
+        - $ref: '#/components/parameters/direction'
+      responses:
+        200:
+         description: A paged list of pet summaries
+         content:
+           application/json:
+             schema:
+               $ref: '#/components/schemas/PagedPetSummary'
+
+  /api/v1/customers/{customerId}/pets/{petId}:
+    parameters:
+      - in: path
+        name: customerId
+        required: true
+        example: 09a46223-1757-454a-bd30-75b36f09e765
+        schema:
+         type: string
+         format: uuid
+      - in: path
+        name: petId
+        required: true
+        example: 09a46223-1757-454a-bd30-75b36f09e765
+        schema:
+         type: string
+         format: uuid
+    get:
+      tags: [Pets]
+      summary: Get a pet by id
+      responses:
+        200:
+         description: Pet found
+         content:
+           application/json:
+             schema:
+               $ref: '#/components/schemas/PetDetailOutput'
+        404:
+         $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Pets]
+      summary: Update a pet
+      requestBody:
+        required: true
+        content:
+         application/json:
+           schema:
+             $ref: '#/components/schemas/PetUpdateInput'
+      responses:
+        204:
+         description: Updated successfully
+        400:
+         $ref: '#/components/responses/BadRequest'
+        404:
+         $ref: '#/components/responses/NotFound'
+        422:
+         $ref: '#/components/responses/UnprocessableEntity'
+        500:
+         $ref: '#/components/responses/InternalError'
+    delete:
+      tags: [Pets]
+      summary: Remove a pet from a customer
+      responses:
+        204:
+         description: Pet removed
+        404:
+         $ref: '#/components/responses/NotFound'
+
 components:
   parameters:
     page:
@@ -402,6 +520,7 @@ components:
       schema:
         type: string
         default: asc
+
   responses:
     NotFound:
       description: Resource not found
@@ -433,6 +552,7 @@ components:
         application/problem+json:
           schema:
             $ref: '#/components/schemas/ProblemDetail'
+
   schemas:
     CustomerInput:
       type: object
@@ -660,6 +780,113 @@ components:
          type: string
          format: email
         phone:
+         type: string
+
+    PetInput:
+      type: object
+      required: [ name, type, size, breed, gender ]
+      properties:
+        name:
+         type: string
+        type:
+         type: string
+         example: DOG
+        size:
+         type: string
+         example: MEDIUM
+        breed:
+         type: string
+         example: LABRADOR
+        gender:
+         type: string
+         example: MALE
+        weight:
+         type: number
+         format: double
+         example: 25.5
+        age:
+         type: integer
+         example: 3
+
+    PetDetailOutput:
+      type: object
+      properties:
+        id:
+         type: string
+         format: uuid
+        customerId:
+         type: string
+         format: uuid
+        name:
+         type: string
+        type:
+         type: string
+        size:
+         type: string
+        breed:
+         type: string
+        gender:
+         type: string
+        weight:
+         type: number
+         format: double
+        age:
+         type: integer
+        registeredAt:
+         type: string
+         format: date-time
+         example: 2020-01-01T14:10:32Z
+
+    PetUpdateInput:
+      type: object
+      required: [ name, type, size, breed, gender, weight, age ]
+      properties:
+        name:
+         type: string
+        type:
+         type: string
+        size:
+         type: string
+        breed:
+         type: string
+        gender:
+         type: string
+        weight:
+         type: number
+         format: double
+        age:
+         type: integer
+
+    PagedPetSummary:
+      type: object
+      properties:
+        content:
+         type: array
+         items:
+          $ref: '#/components/schemas/PetSummaryOutput'
+        totalElements:
+         type: integer
+        totalPages:
+         type: integer
+        number:
+         type: integer
+        size:
+         type: integer
+
+    PetSummaryOutput:
+      type: object
+      properties:
+        id:
+         type: string
+         format: uuid
+        customerId:
+         type: string
+         format: uuid
+        name:
+         type: string
+        type:
+         type: string
+        breed:
          type: string
 
     ProblemDetail:
