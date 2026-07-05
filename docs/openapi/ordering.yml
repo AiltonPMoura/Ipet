@@ -17,6 +17,8 @@ tags:
     description: Operations related to companies
   - name: Pets
     description: Operations related to customer pets
+  - name: Shopping Carts
+    description: Operations related to shopping carts
 
 paths:
   /api/v1/customers:
@@ -493,6 +495,127 @@ paths:
         404:
          $ref: '#/components/responses/NotFound'
 
+  /api/v1/customers/{customerId}/shopping-carts:
+    parameters:
+     - in: path
+       name: customerId
+       required: true
+       schema:
+         type: string
+         format: uuid
+    post:
+     tags: [Shopping Carts]
+     summary: Create a new shopping cart for a customer
+     responses:
+       201:
+         description: Created. Location header contains URL of the new resource.
+         headers:
+           Location:
+             description: URL of the created shopping cart
+             schema:
+               type: string
+       400:
+         $ref: '#/components/responses/BadRequest'
+       422:
+         $ref: '#/components/responses/UnprocessableEntity'
+       500:
+         $ref: '#/components/responses/InternalError'
+
+  /api/v1/customers/{customerId}/shopping-carts/{shoppingCartId}:
+    parameters:
+     - in: path
+       name: customerId
+       required: true
+       schema:
+         type: string
+         format: uuid
+     - in: path
+       name: shoppingCartId
+       required: true
+       schema:
+         type: string
+         format: uuid
+    put:
+      tags: [ Shopping Carts ]
+      summary: Empty the shopping cart
+      responses:
+        204:
+          description: Shopping cart emptied
+        404:
+          description: Shopping cart not found
+    delete:
+     tags: [Shopping Carts]
+     summary: Delete a shopping cart
+     responses:
+       204:
+         description: Shopping cart deleted
+       404:
+         description: Shopping cart not found
+
+  /api/v1/customers/{customerId}/shopping-carts/{shoppingCartId}/items:
+    parameters:
+     - in: path
+       name: customerId
+       required: true
+       schema:
+         type: string
+         format: uuid
+     - in: path
+       name: shoppingCartId
+       required: true
+       schema:
+         type: string
+         format: uuid
+    post:
+     tags: [Shopping Carts]
+     summary: Add an item to the shopping cart
+     requestBody:
+       required: true
+       content:
+         application/json:
+           schema:
+             $ref: '#/components/schemas/ShoppingCartItemInput'
+     responses:
+       201:
+         description: Item added
+       400:
+         $ref: '#/components/responses/BadRequest'
+       404:
+         $ref: '#/components/responses/NotFound'
+       422:
+         $ref: '#/components/responses/UnprocessableEntity'
+       500:
+         $ref: '#/components/responses/InternalError'
+
+  /api/v1/customers/{customerId}/shopping-carts/{shoppingCartId}/items/{itemId}:
+    parameters:
+     - in: path
+       name: customerId
+       required: true
+       schema:
+         type: string
+         format: uuid
+     - in: path
+       name: shoppingCartId
+       required: true
+       schema:
+         type: string
+         format: uuid
+     - in: path
+       name: itemId
+       required: true
+       schema:
+         type: string
+         format: uuid
+    delete:
+     tags: [Shopping Carts]
+     summary: Remove an item from the shopping cart
+     responses:
+       204:
+         description: Item removed
+       404:
+         $ref: '#/components/responses/NotFound'
+
 components:
   parameters:
     page:
@@ -911,5 +1034,16 @@ components:
         fields:
           type: object
           description: Fields that caused the error
+
+    ShoppingCartItemInput:
+      type: object
+      required: [ productId, quantity ]
+      properties:
+        productId:
+         type: string
+         format: uuid
+        quantity:
+         type: integer
+         example: 2
 
 
