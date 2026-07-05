@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
-  title: Ipet - Customer
+  title: Ipet - Ordering
   version: 1.0.0
-  description: OpenAPI specification for the CustomerController in the Ordering microservice.
+  description: OpenAPI specification for the Ordering microservice.
 
 servers:
   - description: Development
@@ -13,6 +13,8 @@ servers:
 tags:
   - name: Customers
     description: Operations related to customers and their addresses
+  - name: Companies
+    description: Operations related to companies
 
 paths:
   /api/v1/customers:
@@ -58,28 +60,11 @@ paths:
           name: email
           schema:
             type: string
-        - in: query
-          name: page
-          schema:
-            type: integer
-            format: int32
-            default: 0
-        - in: query
-          name: size
-          schema:
-            type: integer
-            format: int32
-            default: 20
-        - in: query
-          name: sort
-          schema:
-            type: string
-            example: firstName
-        - in: query
-          name: direction
-          schema:
-            type: string
-            default: asc
+            example: name@email.com
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+        - $ref: '#/components/parameters/sort'
+        - $ref: '#/components/parameters/direction'
       responses:
         200:
           description: A paged list of customer summaries
@@ -263,10 +248,163 @@ paths:
         404:
           description: Customer or address not found
 
+  /api/v1/companies:
+    post:
+      tags: [Companies]
+      summary: Create a new company
+      description: Create a new company with a single address
+      requestBody:
+        required: true
+        content:
+         application/json:
+           schema:
+             $ref: '#/components/schemas/CompanyInput'
+      responses:
+        201:
+         description: Created. Location header contains URL of the new resource.
+         headers:
+           Location:
+             description: URL of the created company
+             schema:
+               type: string
+        400:
+         $ref: '#/components/responses/BadRequest'
+        409:
+         $ref: '#/components/responses/Conflict'
+        422:
+         $ref: '#/components/responses/UnprocessableEntity'
+        500:
+         $ref: '#/components/responses/InternalError'
+    get:
+      tags: [Companies]
+      summary: Filter companies (paged)
+      parameters:
+        - in: query
+          name: companyName
+          schema:
+            type: string
+        - in: query
+          name: email
+          schema:
+            type: string
+            example: company@email.com
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+        - $ref: '#/components/parameters/sort'
+        - $ref: '#/components/parameters/direction'
+      responses:
+        200:
+         description: A paged list of company summaries
+         content:
+           application/json:
+             schema:
+               $ref: '#/components/schemas/PagedCompanySummary'
+
+  /api/v1/companies/{companyId}:
+    parameters:
+      - in: path
+        name: companyId
+        required: true
+        example: 09a46223-1757-454a-bd30-75b36f09e765
+        schema:
+         type: string
+         format: uuid
+    get:
+      tags: [Companies]
+      summary: Get a company by id
+      responses:
+        200:
+         description: Company found
+         content:
+           application/json:
+             schema:
+               $ref: '#/components/schemas/CompanyDetailOutput'
+        404:
+         $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Companies]
+      summary: Update a company
+      requestBody:
+        required: true
+        content:
+         application/json:
+           schema:
+             $ref: '#/components/schemas/CompanyUpdateInput'
+      responses:
+        204:
+         description: Updated successfully
+        400:
+         $ref: '#/components/responses/BadRequest'
+        404:
+         $ref: '#/components/responses/NotFound'
+        409:
+         $ref: '#/components/responses/Conflict'
+        422:
+         $ref: '#/components/responses/UnprocessableEntity'
+        500:
+         $ref: '#/components/responses/InternalError'
+    delete:
+      tags: [ Companies ]
+      summary: Delete a company
+      responses:
+        204:
+         description: Deleted successfully
+        404:
+         $ref: '#/components/responses/NotFound'
+
+  /api/v1/companies/{companyId}/email:
+    parameters:
+      - in: path
+        name: companyId
+        required: true
+        schema:
+         type: string
+         format: uuid
+    patch:
+      tags: [Companies]
+      summary: Change company email
+      requestBody:
+        required: true
+        content:
+         application/json:
+           schema:
+             $ref: '#/components/schemas/EmailInput'
+      responses:
+        204:
+         description: Email changed
+        400:
+         description: Validation error
+
 components:
+  parameters:
+    page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        format: int32
+        default: 0
+    size:
+      name: size
+      in: query
+      schema:
+        type: integer
+        format: int32
+        default: 20
+    sort:
+      name: sort
+      in: query
+      schema:
+        type: string
+    direction:
+      name: direction
+      in: query
+      schema:
+        type: string
+        default: asc
   responses:
     NotFound:
-      description: Resorce not found
+      description: Resource not found
       content:
         application/problem+json:
           schema:
@@ -278,7 +416,7 @@ components:
           schema:
             $ref: '#/components/schemas/ProblemDetail'
     Conflict:
-      description: Confilct Resource
+      description: Conflict Resource
       content:
         application/problem+json:
           schema:
@@ -440,6 +578,89 @@ components:
           format: email
         phone:
           type: string
+
+    CompanyInput:
+      type: object
+      required: [ companyName, email, phone, document, address ]
+      properties:
+        companyName:
+         type: string
+        email:
+         type: string
+         format: email
+        phone:
+         type: string
+         example: 11912345678
+        document:
+         type: string
+         example: 12345678000195
+        address:
+         $ref: '#/components/schemas/AddressData'
+
+    CompanyDetailOutput:
+      type: object
+      properties:
+        id:
+         type: string
+         format: uuid
+        companyName:
+         type: string
+        email:
+         type: string
+         format: email
+        phone:
+         type: string
+         example: 11912345678
+        document:
+         type: string
+         example: 12345678000195
+        address:
+         $ref: '#/components/schemas/AddressData'
+        registeredAt:
+         type: string
+         format: date-time
+         example: 2020-01-01T14:10:32Z
+
+    CompanyUpdateInput:
+      type: object
+      required: [companyName, phone, address]
+      properties:
+        companyName:
+         type: string
+        phone:
+         type: string
+        address:
+         $ref: '#/components/schemas/AddressData'
+
+    PagedCompanySummary:
+      type: object
+      properties:
+        content:
+         type: array
+         items:
+           $ref: '#/components/schemas/CompanySummaryOutput'
+        totalElements:
+         type: integer
+        totalPages:
+         type: integer
+        number:
+         type: integer
+        size:
+         type: integer
+
+    CompanySummaryOutput:
+      type: object
+      properties:
+        id:
+         type: string
+         format: uuid
+        companyName:
+         type: string
+        email:
+         type: string
+         format: email
+        phone:
+         type: string
 
     ProblemDetail:
       type: object
