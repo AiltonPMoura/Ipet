@@ -6,9 +6,9 @@ info:
 
 servers:
   - description: Development
-    url: http://localhost:8080
+    url: http://localhost:8080/api
   - description: Production
-    url: https://ipet.com
+    url: https://ipet.com/api
 
 tags:
   - name: Customers
@@ -21,7 +21,7 @@ tags:
     description: Operations related to shopping carts
 
 paths:
-  /api/v1/customers:
+  /v1/customers:
     post:
       tags: [Customers]
       summary: Create a new customer
@@ -77,7 +77,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PagedCustomerSummary'
 
-  /api/v1/customers/{customerId}:
+  /v1/customers/{customerId}:
     parameters:
       - in: path
         name: customerId
@@ -129,7 +129,7 @@ paths:
         404:
           $ref: '#/components/responses/NotFound'
 
-  /api/v1/customers/{customerId}/email:
+  /v1/customers/{customerId}/email:
     parameters:
       - in: path
         name: customerId
@@ -152,7 +152,7 @@ paths:
         400:
           description: Validation error
 
-  /api/v1/customers/{customerId}/addresses:
+  /v1/customers/{customerId}/addresses:
     parameters:
       - in: path
         name: customerId
@@ -196,7 +196,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/CustomerAddressOutput'
 
-  /api/v1/customers/{customerId}/addresses/{addressId}:
+  /v1/customers/{customerId}/addresses/{addressId}:
     parameters:
       - in: path
         name: customerId
@@ -233,7 +233,7 @@ paths:
         404:
           description: Customer or address not found
 
-  /api/v1/customers/{customerId}/addresses/{addressId}/principal:
+  /v1/customers/{customerId}/addresses/{addressId}/principal:
     parameters:
       - in: path
         name: customerId
@@ -256,7 +256,7 @@ paths:
         404:
           description: Customer or address not found
 
-  /api/v1/companies:
+  /v1/companies:
     post:
       tags: [Companies]
       summary: Create a new company
@@ -308,7 +308,7 @@ paths:
              schema:
                $ref: '#/components/schemas/PagedCompanySummary'
 
-  /api/v1/companies/{companyId}:
+  /v1/companies/{companyId}:
     parameters:
       - in: path
         name: companyId
@@ -360,7 +360,7 @@ paths:
         404:
          $ref: '#/components/responses/NotFound'
 
-  /api/v1/companies/{companyId}/email:
+  /v1/companies/{companyId}/email:
     parameters:
       - in: path
         name: companyId
@@ -383,7 +383,7 @@ paths:
         400:
          description: Validation error
 
-  /api/v1/customers/{customerId}/pets:
+  /v1/customers/{customerId}/pets:
     parameters:
       - in: path
         name: customerId
@@ -438,7 +438,7 @@ paths:
              schema:
                $ref: '#/components/schemas/PagedPetSummary'
 
-  /api/v1/customers/{customerId}/pets/{petId}:
+  /v1/customers/{customerId}/pets/{petId}:
     parameters:
       - in: path
         name: customerId
@@ -495,7 +495,7 @@ paths:
         404:
          $ref: '#/components/responses/NotFound'
 
-  /api/v1/customers/{customerId}/shopping-carts:
+  /v1/customers/{customerId}/shopping-carts:
     parameters:
      - in: path
        name: customerId
@@ -521,7 +521,7 @@ paths:
        500:
          $ref: '#/components/responses/InternalError'
 
-  /api/v1/customers/{customerId}/shopping-carts/{shoppingCartId}:
+  /v1/customers/{customerId}/shopping-carts/{shoppingCartId}:
     parameters:
      - in: path
        name: customerId
@@ -552,7 +552,7 @@ paths:
        404:
          description: Shopping cart not found
 
-  /api/v1/customers/{customerId}/shopping-carts/{shoppingCartId}/items:
+  /v1/customers/{customerId}/shopping-carts/{shoppingCartId}/items:
     parameters:
      - in: path
        name: customerId
@@ -587,7 +587,7 @@ paths:
        500:
          $ref: '#/components/responses/InternalError'
 
-  /api/v1/customers/{customerId}/shopping-carts/{shoppingCartId}/items/{itemId}:
+  /v1/customers/{customerId}/shopping-carts/{shoppingCartId}/items/{itemId}:
     parameters:
      - in: path
        name: customerId

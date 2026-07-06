@@ -1,0 +1,166 @@
+openapi: 3.0.3
+info:
+  title: Ipet - Catalog
+  version: 1.0.0
+  description: OpenAPI specification for the Catalog microservice.
+
+servers:
+  - description: Development
+    url: http://localhost:8081/api
+  - description: Production
+    url: https://ipet.com/api
+
+tags:
+  - name: Products
+    description: Operations related to products
+
+paths:
+  /v1/products/{productId}:
+    parameters:
+      - in: path
+        name: productId
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags: [Products]
+      summary: Get a product by id
+      description: Retrieve product details by product ID
+      responses:
+        200:
+          description: Product found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductOutput'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalError'
+
+  /v1/companies/{companyId}/products:
+    parameters:
+      - in: path
+        name: companyId
+        required: true
+        schema:
+          type: string
+          format: uuid
+    post:
+      tags: [Products]
+      summary: Create a new product
+      description: Create a new product for a company
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductInput'
+      responses:
+        201:
+          description: Created. Location header contains URL of the new resource.
+          headers:
+            Location:
+              description: URL of the created product
+              schema:
+                type: string
+        400:
+          $ref: '#/components/responses/BadRequest'
+        422:
+          $ref: '#/components/responses/UnprocessableEntity'
+        500:
+          $ref: '#/components/responses/InternalError'
+
+components:
+  responses:
+    BadRequest:
+      description: Invalid Request
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+    NotFound:
+      description: Resource not found
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+    UnprocessableEntity:
+      description: Unprocessable entity
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+    InternalError:
+      description: Internal Server Error
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+
+  schemas:
+    ProductInput:
+      type: object
+      required: [ name, description, price, quantity, subcategory ]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+          format: double
+          example: 99.99
+        quantity:
+          type: integer
+          example: 10
+        totalStock:
+          type: integer
+        subcategory:
+          type: string
+          example: FOOD
+
+    ProductOutput:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+          format: double
+        quantity:
+          type: integer
+        subcategory:
+          type: string
+
+    ProblemDetail:
+      type: object
+      required: [status, type]
+      properties:
+        status:
+          type: integer
+          example: 400
+        type:
+          type: string
+          example: /errors/invalid-data
+        title:
+          type: string
+          example: Invalid Fields
+        instance:
+          type: string
+          example: /api/v1/companies/123/products
+        detail:
+          type: string
+          example: One or more fields are invalid
+        fields:
+          type: object
+          description: Fields that caused the error
