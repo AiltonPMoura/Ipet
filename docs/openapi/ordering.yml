@@ -19,8 +19,317 @@ tags:
     description: Operations related to customer pets
   - name: Shopping Carts
     description: Operations related to shopping carts
+  - name: Schedules
+    description: Operations related to appointment schedules
 
 paths:
+  /v1/appointment-schedules/{appointmentScheduleId}/work-days/{workDayId}/locked-times:
+    parameters:
+      - in: path
+        name: appointmentScheduleId
+        required: true
+        example: 09a46223-1757-454a-bd30-75b36f09e765
+        schema:
+          type: string
+          format: uuid
+      - in: path
+        name: workDayId
+        required: true
+        example: 09a46223-1757-454a-bd30-75b36f09e765
+        schema:
+          type: string
+          format: uuid
+    post:
+      tags: [Schedules]
+      summary: Add a locked time to a work day
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LockedTimeInput'
+      responses:
+        201:
+          description: Locked time created
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        422:
+          $ref: '#/components/responses/UnprocessableContent'
+        500:
+          $ref: '#/components/responses/InternalError'
+    delete:
+      tags: [Schedules]
+      summary: Remove a locked time from a work day
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LockedTimeInput'
+      responses:
+        204:
+          description: No Content
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        422:
+          $ref: '#/components/responses/UnprocessableContent'
+        500:
+          $ref: '#/components/responses/InternalError'
+    put:
+      tags: [Schedules]
+      summary: Change an existing locked time on a work day
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LockedTimeUpdateInput'
+      responses:
+        204:
+          description: No Content
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        422:
+          $ref: '#/components/responses/UnprocessableContent'
+        500:
+          $ref: '#/components/responses/InternalError'
+
+  /v1/appointment-schedules:
+    post:
+      tags: [Schedules]
+      summary: Create a new appointment schedule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleInput'
+      responses:
+        201:
+          description: Created. Location header contains URL of the new resource.
+          headers:
+            Location:
+              description: URL of the created appointment schedule
+              example: /api/v1/appointment-schedules/09a46223-1757-454a-bd30-75b36f09e765
+              schema:
+                type: string
+        400:
+          $ref: '#/components/responses/BadRequest'
+        422:
+          $ref: '#/components/responses/UnprocessableContent'
+        500:
+          $ref: '#/components/responses/InternalError'
+
+  /v1/appointment-schedules/{id}/name:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      tags: [Schedules]
+      summary: Change the name of an appointment schedule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        204:
+          description: No Content
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalError'
+
+  /v1/appointment-schedules/{id}/locked-dates:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      tags: [Schedules]
+      summary: Change locked dates for an appointment schedule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+                format: date
+      responses:
+        204:
+          description: No Content
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalError'
+
+  /v1/appointment-schedules/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags: [Schedules]
+      summary: Get an appointment schedule by id
+      responses:
+        200:
+          description: Appointment schedule found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentScheduleDetailOutput'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+  /v1/appointment-schedules/{appointmentScheduleId}/work-days:
+    parameters:
+      - in: path
+        name: appointmentScheduleId
+        required: true
+        schema:
+          type: string
+          format: uuid
+    post:
+      tags: [Schedules]
+      summary: Add a work day to an appointment schedule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkDayInput'
+      responses:
+        201:
+          description: Created. Location header contains URL of the new resource.
+          headers:
+            Location:
+              description: URL of the created work day
+              example: /api/v1/appointment-schedules/09a46223-1757-454a-bd30-75b36f09e765/work-days/09a4
+              schema:
+                type: string
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        422:
+          $ref: '#/components/responses/UnprocessableContent'
+        500:
+          $ref: '#/components/responses/InternalError'
+
+  /v1/appointment-schedules/{appointmentScheduleId}/work-days/{id}:
+    parameters:
+      - in: path
+        name: appointmentScheduleId
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          format: uuid
+    delete:
+      tags: [Schedules]
+      summary: Remove a work day from an appointment schedule
+      responses:
+        204:
+          description: No Content
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalError'
+    put:
+      tags: [Schedules]
+      summary: Update a work day on an appointment schedule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkDayInput'
+      responses:
+        204:
+          description: No Content
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        422:
+          $ref: '#/components/responses/UnprocessableContent'
+        500:
+          $ref: '#/components/responses/InternalError'
+
+  /v1/appointment-schedules/{id}/active:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        example: 09a46223-1757-454a-bd30-75b36f09e765
+        schema:
+          type: string
+          format: uuid
+    patch:
+      tags: [Schedules]
+      summary: Activate an appointment schedule
+      responses:
+        204:
+          description: No Content
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalError'
+
+  /v1/appointment-schedules/{id}/inactive:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        example: 09a46223-1757-454a-bd30-75b36f09e765
+        schema:
+          type: string
+          format: uuid
+    patch:
+      tags: [Schedules]
+      summary: Inactivate an appointment schedule
+      responses:
+        204:
+          description: No Content
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalError'
+
+          
   /v1/customers:
     post:
       tags: [Customers]
@@ -38,6 +347,7 @@ paths:
           headers:
             Location:
               description: URL of the created customer
+              example: /api/v1/customers/09a46223-1757-454a-bd30-75b36f09e765
               schema:
                 type: string
         400:
@@ -45,7 +355,7 @@ paths:
         409:
           $ref: '#/components/responses/Conflict'
         422:
-          $ref: '#/components/responses/UnprocessableEntity'
+          $ref: '#/components/responses/UnprocessableContent'
         500:
           $ref: '#/components/responses/InternalError'
     get:
@@ -75,7 +385,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PagedCustomerSummary'
+                allOf:
+                - $ref: '#/components/schemas/Page'
+                - type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CustomerSummaryOutput'
 
   /v1/customers/{customerId}:
     parameters:
@@ -117,7 +434,7 @@ paths:
         409:
           $ref: '#/components/responses/Conflict'
         422:
-          $ref: '#/components/responses/UnprocessableEntity'
+          $ref: '#/components/responses/UnprocessableContent'
         500:
           $ref: '#/components/responses/InternalError'
     delete:
@@ -180,7 +497,7 @@ paths:
         400:
           $ref: '#/components/responses/BadRequest'
         422:
-          $ref: '#/components/responses/UnprocessableEntity'
+          $ref: '#/components/responses/UnprocessableContent'
         500:
           $ref: '#/components/responses/InternalError'
     get:
@@ -280,7 +597,7 @@ paths:
         409:
          $ref: '#/components/responses/Conflict'
         422:
-         $ref: '#/components/responses/UnprocessableEntity'
+         $ref: '#/components/responses/UnprocessableContent'
         500:
          $ref: '#/components/responses/InternalError'
     get:
@@ -306,7 +623,14 @@ paths:
          content:
            application/json:
              schema:
-               $ref: '#/components/schemas/PagedCompanySummary'
+               allOf:
+                 - $ref: '#/components/schemas/Page'
+                 - type: object
+               properties:
+                 content:
+                   type: array
+                   items:
+                     $ref: '#/components/schemas/CompanySummaryOutput'
 
   /v1/companies/{companyId}:
     parameters:
@@ -348,7 +672,7 @@ paths:
         409:
          $ref: '#/components/responses/Conflict'
         422:
-         $ref: '#/components/responses/UnprocessableEntity'
+         $ref: '#/components/responses/UnprocessableContent'
         500:
          $ref: '#/components/responses/InternalError'
     delete:
@@ -411,7 +735,7 @@ paths:
         400:
          $ref: '#/components/responses/BadRequest'
         422:
-         $ref: '#/components/responses/UnprocessableEntity'
+         $ref: '#/components/responses/UnprocessableContent'
         500:
          $ref: '#/components/responses/InternalError'
     get:
@@ -436,7 +760,14 @@ paths:
          content:
            application/json:
              schema:
-               $ref: '#/components/schemas/PagedPetSummary'
+               allOf:
+                 - $ref: '#/components/schemas/Page'
+                 - type: object
+               properties:
+                 content:
+                   type: array
+                   items:
+                     $ref: '#/components/schemas/PetSummaryOutput'
 
   /v1/customers/{customerId}/pets/{petId}:
     parameters:
@@ -483,7 +814,7 @@ paths:
         404:
          $ref: '#/components/responses/NotFound'
         422:
-         $ref: '#/components/responses/UnprocessableEntity'
+         $ref: '#/components/responses/UnprocessableContent'
         500:
          $ref: '#/components/responses/InternalError'
     delete:
@@ -517,7 +848,7 @@ paths:
        400:
          $ref: '#/components/responses/BadRequest'
        422:
-         $ref: '#/components/responses/UnprocessableEntity'
+         $ref: '#/components/responses/UnprocessableContent'
        500:
          $ref: '#/components/responses/InternalError'
 
@@ -583,7 +914,7 @@ paths:
        404:
          $ref: '#/components/responses/NotFound'
        422:
-         $ref: '#/components/responses/UnprocessableEntity'
+         $ref: '#/components/responses/UnprocessableContent'
        500:
          $ref: '#/components/responses/InternalError'
 
@@ -663,8 +994,8 @@ components:
         application/problem+json:
           schema:
             $ref: '#/components/schemas/ProblemDetail'
-    UnprocessableEntity:
-      description: Unprocessable entity
+    UnprocessableContent:
+      description: Unprocessable content
       content:
         application/problem+json:
           schema:
@@ -790,22 +1121,6 @@ components:
         phone:
           type: string
 
-    PagedCustomerSummary:
-      type: object
-      properties:
-        content:
-          type: array
-          items:
-            $ref: '#/components/schemas/CustomerSummaryOutput'
-        totalElements:
-          type: integer
-        totalPages:
-          type: integer
-        number:
-          type: integer
-        size:
-          type: integer
-
     CustomerSummaryOutput:
       type: object
       properties:
@@ -875,22 +1190,6 @@ components:
         address:
          $ref: '#/components/schemas/AddressData'
 
-    PagedCompanySummary:
-      type: object
-      properties:
-        content:
-         type: array
-         items:
-           $ref: '#/components/schemas/CompanySummaryOutput'
-        totalElements:
-         type: integer
-        totalPages:
-         type: integer
-        number:
-         type: integer
-        size:
-         type: integer
-
     CompanySummaryOutput:
       type: object
       properties:
@@ -913,15 +1212,19 @@ components:
          type: string
         type:
          type: string
+         enum: [DOG, CAT, BIRD]
          example: DOG
         size:
          type: string
+         enum: [SMALL, MEDIUM, LARGE, GIANT]
          example: MEDIUM
         breed:
          type: string
+         enum: [MIXED_BREED, POODLE, SHIN_TZU, GERMAN_SHEPHERD, PIT_BULL, PINSCHER, LABRADOR, GOLDEN, YORKSHIRE, CHIHUAHUA]
          example: LABRADOR
         gender:
          type: string
+         enum: [MALE, FEMALE]
          example: MALE
         weight:
          type: number
@@ -980,22 +1283,6 @@ components:
         age:
          type: integer
 
-    PagedPetSummary:
-      type: object
-      properties:
-        content:
-         type: array
-         items:
-          $ref: '#/components/schemas/PetSummaryOutput'
-        totalElements:
-         type: integer
-        totalPages:
-         type: integer
-        number:
-         type: integer
-        size:
-         type: integer
-
     PetSummaryOutput:
       type: object
       properties:
@@ -1012,9 +1299,25 @@ components:
         breed:
          type: string
 
+    Page:
+      type: object
+      properties:
+        number:
+          type: integer
+          example: 2
+        size:
+          type: integer
+          example: 15
+        totalPages:
+          type: integer
+          example: 14
+        totalElements:
+          type: integer
+          example: 200
+
     ProblemDetail:
       type: object
-      required: [status, type]
+      required: [ status, type ]
       properties:
         status:
           type: integer
@@ -1040,10 +1343,110 @@ components:
       required: [ productId, quantity ]
       properties:
         productId:
-         type: string
-         format: uuid
+          type: string
+          format: uuid
         quantity:
-         type: integer
-         example: 2
+          type: integer
+          example: 2
+
+    LockedTimeInput:
+      type: object
+      required: [ startTime, endTime ]
+      properties:
+        startTime:
+          type: string
+          format: time
+          example: "09:00:00"
+        endTime:
+          type: string
+          format: time
+          example: "10:00:00"
+
+    LockedTimeUpdateInput:
+      type: object
+      required: [ oldLockedTime, newLockedTime ]
+      properties:
+        oldLockedTime:
+          $ref: '#/components/schemas/LockedTimeInput'
+        newLockedTime:
+          $ref: '#/components/schemas/LockedTimeInput'
+
+    ScheduleInput:
+      type: object
+      properties:
+        scheduleId:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        subCategory:
+          type: string
+
+    AppointmentScheduleDetailOutput:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        serviceCategory:
+          type: string
+        status:
+          type: string
+        lockedDates:
+          type: array
+          items:
+            type: string
+            format: date
+        workDays:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkDayOutput'
+
+    WorkDayOutput:
+      type: object
+      properties:
+        dayOfWeek:
+          type: string
+        startTime:
+          type: string
+          format: time
+        endTime:
+          type: string
+          format: time
+        lockedTimes:
+          type: array
+          items:
+            $ref: '#/components/schemas/LockedTimeOutput'
+
+    LockedTimeOutput:
+      type: object
+      properties:
+        startTime:
+          type: string
+          format: time
+        endTime:
+          type: string
+          format: time
+
+    WorkDayInput:
+      type: object
+      required: [ dayOfWeek, startTime, endTime ]
+      properties:
+        dayOfWeek:
+          type: string
+          example: MONDAY
+        startTime:
+          type: string
+          format: time
+          example: "09:00:00"
+        endTime:
+          type: string
+          format: time
+          example: "17:00:00"
 
 
