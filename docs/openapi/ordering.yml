@@ -21,8 +21,239 @@ tags:
     description: Operations related to shopping carts
   - name: Schedules
     description: Operations related to appointment schedules
+  - name: Bookings
+    description: Operations related to appointment bookings
 
 paths:
+  /v1/appointment-schedules:
+    post:
+      tags: [Schedules]
+      summary: Create a new appointment schedule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleInput'
+      responses:
+        201:
+          description: Created. Location header contains URL of the new resource.
+          headers:
+            Location:
+              description: URL of the created appointment schedule
+              example: /api/v1/appointment-schedules/09a46223-1757-454a-bd30-75b36f09e765
+              schema:
+                type: string
+        400:
+          $ref: '#/components/responses/BadRequest'
+        422:
+          $ref: '#/components/responses/UnprocessableContent'
+        500:
+          $ref: '#/components/responses/InternalError'
+
+  /v1/appointment-schedules/{appointmentScheduleId}:
+    parameters:
+      - in: path
+        name: appointmentScheduleId
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags: [Schedules]
+      summary: Get an appointment schedule by id
+      responses:
+        200:
+          description: Appointment schedule found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentScheduleDetailOutput'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+  /v1/appointment-schedules/{appointmentScheduleId}/name:
+    parameters:
+      - in: path
+        name: appointmentScheduleId
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      tags: [Schedules]
+      summary: Change the name of an appointment schedule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        204:
+          description: No Content
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalError'
+
+  /v1/appointment-schedules/{appointmentScheduleId}/locked-dates:
+    parameters:
+      - in: path
+        name: appointmentScheduleId
+        required: true
+        schema:
+          type: string
+          format: uuid
+    put:
+      tags: [Schedules]
+      summary: Change locked dates for an appointment schedule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+                format: date
+      responses:
+        204:
+          description: No Content
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalError'
+
+  /v1/appointment-schedules/{appointmentScheduleId}/activate:
+    parameters:
+      - in: path
+        name: appointmentScheduleId
+        required: true
+        example: 09a46223-1757-454a-bd30-75b36f09e765
+        schema:
+          type: string
+          format: uuid
+    post:
+      tags: [Schedules]
+      summary: Activate an appointment schedule
+      responses:
+        204:
+          description: No Content
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalError'
+
+  /v1/appointment-schedules/{appointmentScheduleId}/deactivate:
+    parameters:
+      - in: path
+        name: appointmentScheduleId
+        required: true
+        example: 09a46223-1757-454a-bd30-75b36f09e765
+        schema:
+          type: string
+          format: uuid
+    post:
+      tags: [Schedules]
+      summary: Inactivate an appointment schedule
+      responses:
+        204:
+          description: No Content
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalError'
+
+  /v1/appointment-schedules/{appointmentScheduleId}/work-days:
+    parameters:
+      - in: path
+        name: appointmentScheduleId
+        required: true
+        schema:
+          type: string
+          format: uuid
+    post:
+      tags: [Schedules]
+      summary: Add a work day to an appointment schedule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkDayInput'
+      responses:
+        201:
+          description: Created. Location header contains URL of the new resource.
+          headers:
+            Location:
+              description: URL of the created work day
+              example: /api/v1/appointment-schedules/09a46223-1757-454a-bd30-75b36f09e765/work-days/09a4
+              schema:
+                type: string
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        422:
+          $ref: '#/components/responses/UnprocessableContent'
+        500:
+          $ref: '#/components/responses/InternalError'
+
+  /v1/appointment-schedules/{appointmentScheduleId}/work-days/{workDayId}:
+    parameters:
+      - in: path
+        name: appointmentScheduleId
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - in: path
+        name: workDayId
+        required: true
+        schema:
+          type: string
+          format: uuid
+    delete:
+      tags: [Schedules]
+      summary: Remove a work day from an appointment schedule
+      responses:
+        204:
+          description: No Content
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalError'
+    put:
+      tags: [Schedules]
+      summary: Update a work day on an appointment schedule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkDayInput'
+      responses:
+        204:
+          description: No Content
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        422:
+          $ref: '#/components/responses/UnprocessableContent'
+        500:
+          $ref: '#/components/responses/InternalError'
+
   /v1/appointment-schedules/{appointmentScheduleId}/work-days/{workDayId}/locked-times:
     parameters:
       - in: path
@@ -100,137 +331,24 @@ paths:
         500:
           $ref: '#/components/responses/InternalError'
 
-  /v1/appointment-schedules:
+  /v1/appointment-bookings:
     post:
-      tags: [Schedules]
-      summary: Create a new appointment schedule
+      tags: [Bookings]
+      summary: Create an appointment booking
+      description: Creates an appointment booking for a customer, schedule, pets, and services.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ScheduleInput'
+              $ref: '#/components/schemas/AppointmentBookingInput'
       responses:
         201:
-          description: Created. Location header contains URL of the new resource.
+          description: Booking created. Location header contains the booking URL.
           headers:
             Location:
-              description: URL of the created appointment schedule
-              example: /api/v1/appointment-schedules/09a46223-1757-454a-bd30-75b36f09e765
-              schema:
-                type: string
-        400:
-          $ref: '#/components/responses/BadRequest'
-        422:
-          $ref: '#/components/responses/UnprocessableContent'
-        500:
-          $ref: '#/components/responses/InternalError'
-
-  /v1/appointment-schedules/{id}/name:
-    parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
-          format: uuid
-    patch:
-      tags: [Schedules]
-      summary: Change the name of an appointment schedule
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                name:
-                  type: string
-      responses:
-        204:
-          description: No Content
-        400:
-          $ref: '#/components/responses/BadRequest'
-        404:
-          $ref: '#/components/responses/NotFound'
-        500:
-          $ref: '#/components/responses/InternalError'
-
-  /v1/appointment-schedules/{id}/locked-dates:
-    parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
-          format: uuid
-    patch:
-      tags: [Schedules]
-      summary: Change locked dates for an appointment schedule
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                type: string
-                format: date
-      responses:
-        204:
-          description: No Content
-        400:
-          $ref: '#/components/responses/BadRequest'
-        404:
-          $ref: '#/components/responses/NotFound'
-        500:
-          $ref: '#/components/responses/InternalError'
-
-  /v1/appointment-schedules/{id}:
-    parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
-          format: uuid
-    get:
-      tags: [Schedules]
-      summary: Get an appointment schedule by id
-      responses:
-        200:
-          description: Appointment schedule found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AppointmentScheduleDetailOutput'
-        404:
-          $ref: '#/components/responses/NotFound'
-
-  /v1/appointment-schedules/{appointmentScheduleId}/work-days:
-    parameters:
-      - in: path
-        name: appointmentScheduleId
-        required: true
-        schema:
-          type: string
-          format: uuid
-    post:
-      tags: [Schedules]
-      summary: Add a work day to an appointment schedule
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/WorkDayInput'
-      responses:
-        201:
-          description: Created. Location header contains URL of the new resource.
-          headers:
-            Location:
-              description: URL of the created work day
-              example: /api/v1/appointment-schedules/09a46223-1757-454a-bd30-75b36f09e765/work-days/09a4
+              description: URL of the created appointment booking
+              example: /api/v1/appointment-bookings/09a46223-1757-454a-bd30-75b36f09e765
               schema:
                 type: string
         400:
@@ -242,94 +360,6 @@ paths:
         500:
           $ref: '#/components/responses/InternalError'
 
-  /v1/appointment-schedules/{appointmentScheduleId}/work-days/{id}:
-    parameters:
-      - in: path
-        name: appointmentScheduleId
-        required: true
-        schema:
-          type: string
-          format: uuid
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
-          format: uuid
-    delete:
-      tags: [Schedules]
-      summary: Remove a work day from an appointment schedule
-      responses:
-        204:
-          description: No Content
-        400:
-          $ref: '#/components/responses/BadRequest'
-        404:
-          $ref: '#/components/responses/NotFound'
-        500:
-          $ref: '#/components/responses/InternalError'
-    put:
-      tags: [Schedules]
-      summary: Update a work day on an appointment schedule
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/WorkDayInput'
-      responses:
-        204:
-          description: No Content
-        400:
-          $ref: '#/components/responses/BadRequest'
-        404:
-          $ref: '#/components/responses/NotFound'
-        422:
-          $ref: '#/components/responses/UnprocessableContent'
-        500:
-          $ref: '#/components/responses/InternalError'
-
-  /v1/appointment-schedules/{id}/active:
-    parameters:
-      - in: path
-        name: id
-        required: true
-        example: 09a46223-1757-454a-bd30-75b36f09e765
-        schema:
-          type: string
-          format: uuid
-    patch:
-      tags: [Schedules]
-      summary: Activate an appointment schedule
-      responses:
-        204:
-          description: No Content
-        404:
-          $ref: '#/components/responses/NotFound'
-        500:
-          $ref: '#/components/responses/InternalError'
-
-  /v1/appointment-schedules/{id}/inactive:
-    parameters:
-      - in: path
-        name: id
-        required: true
-        example: 09a46223-1757-454a-bd30-75b36f09e765
-        schema:
-          type: string
-          format: uuid
-    patch:
-      tags: [Schedules]
-      summary: Inactivate an appointment schedule
-      responses:
-        204:
-          description: No Content
-        404:
-          $ref: '#/components/responses/NotFound'
-        500:
-          $ref: '#/components/responses/InternalError'
-
-          
   /v1/customers:
     post:
       tags: [Customers]
@@ -386,8 +416,8 @@ paths:
             application/json:
               schema:
                 allOf:
-                - $ref: '#/components/schemas/Page'
-                - type: object
+                  - $ref: '#/components/schemas/Page'
+                  - type: object
                 properties:
                   content:
                     type: array
@@ -451,10 +481,11 @@ paths:
       - in: path
         name: customerId
         required: true
+        example: 09a46223-1757-454a-bd30-75b36f09e765
         schema:
           type: string
           format: uuid
-    patch:
+    put:
       tags: [Customers]
       summary: Change customer email
       requestBody:
@@ -467,7 +498,15 @@ paths:
         204:
           description: Email changed
         400:
-          description: Validation error
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        409:
+          $ref: '#/components/responses/Conflict'
+        422:
+          $ref: '#/components/responses/UnprocessableContent'
+        500:
+          $ref: '#/components/responses/InternalError'
 
   /v1/customers/{customerId}/addresses:
     parameters:
@@ -1062,6 +1101,7 @@ components:
 
     EmailInput:
       type: object
+      required: [email]
       properties:
         email:
           type: string
@@ -1385,6 +1425,39 @@ components:
         subCategory:
           type: string
 
+    AppointmentBookingInput:
+      type: object
+      required: [customerId, appointmentScheduleId, companyId, requestedStart, appointments]
+      properties:
+        customerId:
+          type: string
+          format: uuid
+        appointmentScheduleId:
+          type: string
+          format: uuid
+        companyId:
+          type: string
+          format: uuid
+        requestedStart:
+          type: string
+          format: date-time
+          example: "2026-10-20T09:00:00"
+        appointments:
+          type: array
+          items:
+            $ref: '#/components/schemas/AppointmentPetServiceInput'
+
+    AppointmentPetServiceInput:
+      type: object
+      required: [petId, serviceId]
+      properties:
+        petId:
+          type: string
+          format: uuid
+        serviceId:
+          type: string
+          format: uuid
+
     AppointmentScheduleDetailOutput:
       type: object
       properties:
@@ -1448,5 +1521,3 @@ components:
           type: string
           format: time
           example: "17:00:00"
-
-
