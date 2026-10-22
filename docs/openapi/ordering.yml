@@ -72,6 +72,27 @@ paths:
         404:
           $ref: '#/components/responses/NotFound'
 
+  /v1/appointment-schedules/{companyId}/availability:
+    parameters:
+      - in: path
+        name: companyId
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags: [Schedules]
+      summary: Get appointment availability for a company
+      responses:
+        200:
+          description: Available dates and time slots for the company's appointment schedule
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScheduleAvailabilityOutput'
+        404:
+          $ref: '#/components/responses/NotFound'
+
   /v1/appointment-schedules/{appointmentScheduleId}/name:
     parameters:
       - in: path
@@ -1414,9 +1435,6 @@ components:
     ScheduleInput:
       type: object
       properties:
-        scheduleId:
-          type: string
-          format: uuid
         companyId:
           type: string
           format: uuid
@@ -1427,7 +1445,7 @@ components:
 
     AppointmentBookingInput:
       type: object
-      required: [customerId, appointmentScheduleId, companyId, requestedStart, appointments]
+      required: [customerId, appointmentScheduleId, companyId, requestedStart, appointments, paymentMethod]
       properties:
         customerId:
           type: string
@@ -1446,6 +1464,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AppointmentPetServiceInput'
+        paymentMethod:
+          type: string
+          enum: [CREDIT_CART, PIX, GATEWAY_BALANCE]
 
     AppointmentPetServiceInput:
       type: object
@@ -1479,6 +1500,32 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/WorkDayOutput'
+
+    ScheduleAvailabilityOutput:
+      type: object
+      properties:
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        dailyAvailabilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/DailyAvailabilityOutput'
+
+    DailyAvailabilityOutput:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        times:
+          type: array
+          items:
+            type: string
+            format: time
 
     WorkDayOutput:
       type: object
