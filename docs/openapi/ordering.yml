@@ -23,8 +23,90 @@ tags:
     description: Operations related to appointment schedules
   - name: Bookings
     description: Operations related to appointment bookings
+  - name: Pet Transports
+    description: Operations related to pet transportation
 
 paths:
+  /v1/pet-transports:
+    post:
+      tags: [Pet Transports]
+      summary: Register a pet transport
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PetTransportInput'
+      responses:
+        201:
+          description: Created. Location header contains URL of the new pet transport.
+          headers:
+            Location:
+              description: URL of the created pet transport
+              schema:
+                type: string
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        422:
+          $ref: '#/components/responses/UnprocessableContent'
+        500:
+          $ref: '#/components/responses/InternalError'
+
+  /v1/pet-transports/{petTransportId}:
+    parameters:
+      - in: path
+        name: petTransportId
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: companyId
+        required: true
+        schema:
+          type: string
+          format: uuid
+    put:
+      tags: [Pet Transports]
+      summary: Update pet transport driver and capacity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PetTransportUpdateInput'
+      responses:
+        204:
+          description: Pet transport updated
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        422:
+          $ref: '#/components/responses/UnprocessableContent'
+        500:
+          $ref: '#/components/responses/InternalError'
+    delete:
+      tags: [Pet Transports]
+      summary: Delete a pet transport
+      responses:
+        204:
+          description: Pet transport deleted
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        422:
+          description: The company must have more than one pet transport
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+        500:
+          $ref: '#/components/responses/InternalError'
+
   /v1/appointment-schedules:
     post:
       tags: [Schedules]
@@ -72,17 +154,16 @@ paths:
         404:
           $ref: '#/components/responses/NotFound'
 
-  /v1/appointment-schedules/{companyId}/availability:
-    parameters:
-      - in: path
-        name: companyId
-        required: true
-        schema:
-          type: string
-          format: uuid
-    get:
+  /v1/appointment-schedules/availability:
+    post:
       tags: [Schedules]
-      summary: Get appointment availability for a company
+      summary: Get appointment availability for a company and services
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppointmentScheduleAvailabilityFilter'
       responses:
         200:
           description: Available dates and time slots for the company's appointment schedule
@@ -90,8 +171,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ScheduleAvailabilityOutput'
+        400:
+          $ref: '#/components/responses/BadRequest'
         404:
           $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalError'
 
   /v1/appointment-schedules/{appointmentScheduleId}/name:
     parameters:
@@ -101,7 +186,7 @@ paths:
         schema:
           type: string
           format: uuid
-    patch:
+    put:
       tags: [Schedules]
       summary: Change the name of an appointment schedule
       requestBody:
@@ -110,6 +195,7 @@ paths:
           application/json:
             schema:
               type: object
+              required: [name]
               properties:
                 name:
                   type: string
@@ -123,7 +209,7 @@ paths:
         500:
           $ref: '#/components/responses/InternalError'
 
-  /v1/appointment-schedules/{appointmentScheduleId}/locked-dates:
+  /v1/appointment-schedules/{appointmentScheduleId}/blocked-dates:
     parameters:
       - in: path
         name: appointmentScheduleId
@@ -1068,6 +1154,56 @@ components:
             $ref: '#/components/schemas/ProblemDetail'
 
   schemas:
+    PetTransportInput:
+      type: object
+      required: [ companyId, driver, vehicle, petCapacity ]
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        driver:
+          $ref: '#/components/schemas/DriverInput'
+        vehicle:
+          $ref: '#/components/schemas/VehicleInput'
+        petCapacity:
+          type: integer
+          minimum: 1
+          maximum: 10
+
+    PetTransportUpdateInput:
+      type: object
+      required: [ driver, petCapacity ]
+      properties:
+        driver:
+          $ref: '#/components/schemas/DriverInput'
+        petCapacity:
+          type: integer
+          minimum: 1
+          maximum: 10
+
+    DriverInput:
+      type: object
+      required: [ firstName, lastName, document ]
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        document:
+          type: string
+          description: Driver CNH number
+
+    VehicleInput:
+      type: object
+      required: [ licensePlate, brand, model ]
+      properties:
+        licensePlate:
+          type: string
+        brand:
+          type: string
+        model:
+          type: string
+
     CustomerInput:
       type: object
       required: [ firstName, lastName, email, phone, document, birthDate, address ]
@@ -1442,6 +1578,18 @@ components:
           type: string
         subCategory:
           type: string
+
+    AppointmentScheduleAvailabilityFilter:
+      type: object
+      properties:
+        companyId:
+          type: string
+          format: uuid
+        serviceIds:
+          type: array
+          items:
+            type: string
+            format: uuid
 
     AppointmentBookingInput:
       type: object
