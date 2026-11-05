@@ -107,6 +107,39 @@ paths:
         500:
           $ref: '#/components/responses/InternalError'
 
+  /v1/pet-transports/{petTransportId}/status:
+    parameters:
+      - in: path
+        name: petTransportId
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: companyId
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      tags: [Pet Transports]
+      summary: Update pet transport status
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PetTransportStatusInput'
+      responses:
+        204:
+          description: Pet transport status updated
+        404:
+          $ref: '#/components/responses/NotFound'
+        422:
+          $ref: '#/components/responses/UnprocessableContent'
+        500:
+          $ref: '#/components/responses/InternalError'
+
   /v1/appointment-schedules:
     post:
       tags: [Schedules]
@@ -157,7 +190,7 @@ paths:
   /v1/appointment-schedules/availability:
     post:
       tags: [Schedules]
-      summary: Get appointment availability for a company and services
+      summary: Get appointment availability for a company and pet services
       requestBody:
         required: true
         content:
@@ -209,7 +242,7 @@ paths:
         500:
           $ref: '#/components/responses/InternalError'
 
-  /v1/appointment-schedules/{appointmentScheduleId}/blocked-dates:
+  /v1/appointment-schedules/{appointmentScheduleId}/locked-dates:
     parameters:
       - in: path
         name: appointmentScheduleId
@@ -1156,7 +1189,7 @@ components:
   schemas:
     PetTransportInput:
       type: object
-      required: [ companyId, driver, vehicle, petCapacity ]
+      required: [ companyId, driver, vehicle, petCapacity, status ]
       properties:
         companyId:
           type: string
@@ -1169,6 +1202,9 @@ components:
           type: integer
           minimum: 1
           maximum: 10
+        status:
+          type: string
+          enum: [ ACTIVE, MAINTENANCE ]
 
     PetTransportUpdateInput:
       type: object
@@ -1180,6 +1216,14 @@ components:
           type: integer
           minimum: 1
           maximum: 10
+
+    PetTransportStatusInput:
+      type: object
+      required: [ status ]
+      properties:
+        status:
+          type: string
+          enum: [ ACTIVE, MAINTENANCE ]
 
     DriverInput:
       type: object
@@ -1199,6 +1243,7 @@ components:
       properties:
         licensePlate:
           type: string
+          pattern: '^[A-Za-z]{3}-?([0-9][A-Za-z0-9][0-9]{2}|[0-9]{4})$'
         brand:
           type: string
         model:
@@ -1581,19 +1626,21 @@ components:
 
     AppointmentScheduleAvailabilityFilter:
       type: object
+      required: [companyId, petServices]
       properties:
         companyId:
           type: string
           format: uuid
-        serviceIds:
+        petServices:
           type: array
+          uniqueItems: true
+          description: Pet and service pairs to include when calculating appointment duration.
           items:
-            type: string
-            format: uuid
+            $ref: '#/components/schemas/AppointmentPetServiceInput'
 
     AppointmentBookingInput:
       type: object
-      required: [customerId, appointmentScheduleId, companyId, requestedStart, appointments, paymentMethod]
+      required: [customerId, appointmentScheduleId, companyId, customerAddressId, requestedStart, petServices, paymentMethod]
       properties:
         customerId:
           type: string
@@ -1604,11 +1651,14 @@ components:
         companyId:
           type: string
           format: uuid
+        customerAddressId:
+          type: string
+          format: uuid
         requestedStart:
           type: string
           format: date-time
           example: "2026-10-20T09:00:00"
-        appointments:
+        petServices:
           type: array
           items:
             $ref: '#/components/schemas/AppointmentPetServiceInput'
@@ -1626,6 +1676,7 @@ components:
         serviceId:
           type: string
           format: uuid
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
 
     AppointmentScheduleDetailOutput:
       type: object
