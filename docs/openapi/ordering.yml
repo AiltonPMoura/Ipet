@@ -1615,6 +1615,7 @@ components:
 
     ScheduleInput:
       type: object
+      required: [ companyId, name, subCategory, slotIncrementMinutes ]
       properties:
         companyId:
           type: string
@@ -1623,6 +1624,9 @@ components:
           type: string
         subCategory:
           type: string
+        slotIncrementMinutes:
+          type: integer
+          minimum: 15
 
     AppointmentScheduleAvailabilityFilter:
       type: object
