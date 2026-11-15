@@ -410,55 +410,17 @@ paths:
         schema:
           type: string
           format: uuid
-    post:
-      tags: [Schedules]
-      summary: Add a locked time to a work day
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LockedTimeInput'
-      responses:
-        201:
-          description: Locked time created
-        400:
-          $ref: '#/components/responses/BadRequest'
-        404:
-          $ref: '#/components/responses/NotFound'
-        422:
-          $ref: '#/components/responses/UnprocessableContent'
-        500:
-          $ref: '#/components/responses/InternalError'
-    delete:
-      tags: [Schedules]
-      summary: Remove a locked time from a work day
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LockedTimeInput'
-      responses:
-        204:
-          description: No Content
-        400:
-          $ref: '#/components/responses/BadRequest'
-        404:
-          $ref: '#/components/responses/NotFound'
-        422:
-          $ref: '#/components/responses/UnprocessableContent'
-        500:
-          $ref: '#/components/responses/InternalError'
     put:
       tags: [Schedules]
-      summary: Change an existing locked time on a work day
+      summary: Change locked time on a work day
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LockedTimeUpdateInput'
+              type: array
+              items:
+                $ref: '#/components/schemas/LockedTimeInput'
       responses:
         204:
           description: No Content
@@ -1603,15 +1565,6 @@ components:
           type: string
           format: time
           example: "10:00:00"
-
-    LockedTimeUpdateInput:
-      type: object
-      required: [ oldLockedTime, newLockedTime ]
-      properties:
-        oldLockedTime:
-          $ref: '#/components/schemas/LockedTimeInput'
-        newLockedTime:
-          $ref: '#/components/schemas/LockedTimeInput'
 
     ScheduleInput:
       type: object
