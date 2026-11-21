@@ -1568,14 +1568,14 @@ components:
 
     ScheduleInput:
       type: object
-      required: [ companyId, name, subCategory ]
+      required: [ companyId, name, category ]
       properties:
         companyId:
           type: string
           format: uuid
         name:
           type: string
-        subCategory:
+        category:
           type: string
 
     AppointmentScheduleAvailabilityFilter:
